@@ -196,12 +196,24 @@ require("lazy").setup({
           lualine_a = {"mode"},
           lualine_b = {"branch"},
           lualine_c = {"filename"},
-          lualine_x = {"require('lsp-progress').progress()"},
+          lualine_x = {
+            function()
+              return require('lsp-progress').progress()
+            end
+          },
           lualine_y = {"diagnostics", "filetype"},
           lualine_z = {"progress", "location"}
         },
         extensions = {"nvim-tree"},
       })
+
+      vim.api.nvim_create_augroup("lualine_augroup", { clear = true })
+      vim.api.nvim_create_autocmd("User", {
+        group = "lualine_augroup",
+        pattern = "LspProgressStatusUpdated",
+        callback = require("lualine").refresh,
+      })
+
     end
   },
 
@@ -314,12 +326,14 @@ require("lazy").setup({
           "lua", 
           "markdown", 
           "python", 
+          "query",
           "rust", 
           "svelte",
           "terraform", 
           "tsx",
           "typescript",
           "vim", 
+          "vimdoc",
         },
         highlight = {
           enable = true,
@@ -428,24 +442,25 @@ require("lazy").setup({
       local lspconfig = require("lspconfig")
 
       -- Python
-      require('lspconfig').ruff_lsp.setup {
-        init_options = {
-          settings = {
-            args = {},
-          }
-        }
-      }
-
-      require'lspconfig'.pyright.setup{
+      lspconfig.pyright.setup({
         settings = {
           python = {
-            pythonPath = vim.fn.getenv('CONDA_PREFIX') and (vim.fn.getenv('CONDA_PREFIX') .. '/bin/python') or vim.fn.getenv('PYRIGHT_PYTHON')
-          }
+            analysis = {
+              exclude = {"**", "*", "**/*"},
+            },
+            pythonPath = vim.fn.getenv('VIRTUAL_ENV') and (vim.fn.getenv('VIRTUAL_ENV') .. '/bin/python') or vim.fn.getenv('PYRIGHT_PYTHON'),
+          },
         },
-        on_init = function(client)
-          vim.notify("Python Path: " .. client.config.settings.python.pythonPath)
-        end
-      }
+      })
+
+      lspconfig.ruff_lsp.setup({
+        settings = {
+          lint = {
+            -- only use ruff for formatting
+            enable = false,
+          }
+        }
+      })
 
       -- Rust
       lspconfig.rust_analyzer.setup({
