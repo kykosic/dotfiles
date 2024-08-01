@@ -448,7 +448,7 @@ require("lazy").setup({
             analysis = {
               exclude = {"**", "*", "**/*"},
             },
-            pythonPath = vim.fn.getenv('VIRTUAL_ENV') and (vim.fn.getenv('VIRTUAL_ENV') .. '/bin/python') or vim.fn.getenv('PYRIGHT_PYTHON'),
+            pythonPath = os.getenv('VIRTUAL_ENV') and (os.getenv('VIRTUAL_ENV') .. '/bin/python') or os.getenv('PYRIGHT_PYTHON'),
           },
         },
       })
