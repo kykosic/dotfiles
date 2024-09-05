@@ -324,6 +324,7 @@ require("lazy").setup({
           "go", 
           "hcl",
           "javascript",
+          "just",
           "lua", 
           "markdown", 
           "python", 

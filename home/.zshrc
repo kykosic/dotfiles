@@ -41,7 +41,8 @@ alias gbd='f() { git branch -D "$@" }; f'
 alias gitsub="git submodule update --init --recursive"
 
 # cargo
-alias ck='clear; cargo check --all-features'
+alias ck='clear; cargo check --all-features --all-targets'
+alias clippy='clear; cargo clippy --all-features --all-targets'
 
 # Docker
 export DOCKER_BUILDKIT=1
