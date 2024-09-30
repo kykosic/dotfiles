@@ -47,6 +47,7 @@ vim.api.nvim_create_autocmd(
       "javascript",
       "lua",
       "svelte",
+      "terraform",
       "typescript",
       "yaml",
     },
@@ -298,6 +299,21 @@ require("lazy").setup({
     end
   },
 
+  -- Align around characters
+  {
+    "Vonr/align.nvim",
+    branch = "v2",
+    init = function()
+      local align_to_string = function()
+        require("align").align_to_string({
+          preview = true,
+          regex = false,
+        })
+      end
+      vim.keymap.set("x", "<leader>ga", align_to_string, { noremap = true, silent = true })
+    end
+  },
+
   -- Reopen files to last edited line
   {
     "farmergreg/vim-lastplace",
@@ -362,6 +378,10 @@ require("lazy").setup({
       vim.keymap.set("n", "[d", vim.diagnostic.goto_prev)
       vim.keymap.set("n", "]d", vim.diagnostic.goto_next)
 
+      local disable_lsp = function()
+        vim.lsp.stop_client(vim.lsp.get_active_clients())
+      end
+
       -- Apply configs on LSP attach to buffer
       vim.api.nvim_create_autocmd("LspAttach", {
         callback = function(event)
@@ -377,6 +397,7 @@ require("lazy").setup({
           vim.keymap.set("n", "<leader>lf", vim.lsp.buf.format, opts)
           vim.keymap.set("n", "<leader>a", vim.lsp.buf.code_action, opts)
           vim.keymap.set("n", "<leader>lr", "<cmd>LspRestart<cr>", opts)
+          vim.keymap.set('n', '<leader>ld', disable_lsp, opts)
 
           -- auto-format on save
           vim.api.nvim_create_autocmd("BufWritePre", {
