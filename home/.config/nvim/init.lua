@@ -49,6 +49,7 @@ vim.api.nvim_create_autocmd(
       "svelte",
       "terraform",
       "typescript",
+      "typescriptreact",
       "yaml",
     },
     command = "setlocal shiftwidth=2 softtabstop=2",
@@ -458,6 +459,8 @@ require("lazy").setup({
           "pyright",
           "ruff_lsp",
           "rust_analyzer",
+          "tailwindcss",
+          "ts_ls",
         },
       })
 
@@ -498,6 +501,19 @@ require("lazy").setup({
                 group = "module",
               },
             },
+          },
+        },
+      })
+
+      -- Typescript
+      lspconfig.ts_ls.setup({
+        settings = {
+          typescript = {
+            format = {
+              tabSize = 2,
+              indentSize = 2,
+              convertTabsToSpaces = true,
+            }
           },
         },
       })
