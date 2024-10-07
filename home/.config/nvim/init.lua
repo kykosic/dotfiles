@@ -60,9 +60,10 @@ vim.api.nvim_create_autocmd(
   "FileType",
   {
     pattern = {
+      "go",
       "make",
     },
-    command = "setlocal noexpandtab",
+    command = "setlocal noexpandtab shiftwidth=8 softtabstop=8",
   }
 )
 
@@ -456,6 +457,7 @@ require("lazy").setup({
           default_setup,
         },
         ensure_installed = {
+          "gopls",
           "pyright",
           "ruff_lsp",
           "rust_analyzer",
@@ -466,6 +468,9 @@ require("lazy").setup({
 
       -- Language configs
       local lspconfig = require("lspconfig")
+
+      -- Golang
+      lspconfig.gopls.setup({})
 
       -- Python
       lspconfig.pyright.setup({
