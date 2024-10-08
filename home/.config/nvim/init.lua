@@ -46,7 +46,9 @@ vim.api.nvim_create_autocmd(
     pattern = { 
       "javascript",
       "lua",
+      "terraform",
       "typescript",
+      "typescriptreact",
       "yaml",
     },
     command = "setlocal shiftwidth=2 softtabstop=2",
@@ -57,9 +59,10 @@ vim.api.nvim_create_autocmd(
   "FileType",
   {
     pattern = {
+      "go",
       "make",
     },
-    command = "setlocal noexpandtab",
+    command = "setlocal noexpandtab tabstop=4 shiftwidth=4 softtabstop=4",
   }
 )
 
@@ -196,12 +199,24 @@ require("lazy").setup({
           lualine_a = {"mode"},
           lualine_b = {"branch"},
           lualine_c = {"filename"},
-          lualine_x = {"require('lsp-progress').progress()"},
+          lualine_x = {
+            function()
+              return require('lsp-progress').progress()
+            end
+          },
           lualine_y = {"diagnostics", "filetype"},
           lualine_z = {"progress", "location"}
         },
         extensions = {"nvim-tree"},
       })
+
+      vim.api.nvim_create_augroup("lualine_augroup", { clear = true })
+      vim.api.nvim_create_autocmd("User", {
+        group = "lualine_augroup",
+        pattern = "LspProgressStatusUpdated",
+        callback = require("lualine").refresh,
+      })
+
     end
   },
 
@@ -285,6 +300,21 @@ require("lazy").setup({
     end
   },
 
+  -- Align around characters
+  {
+    "Vonr/align.nvim",
+    branch = "v2",
+    init = function()
+      local align_to_string = function()
+        require("align").align_to_string({
+          preview = true,
+          regex = false,
+        })
+      end
+      vim.keymap.set("x", "<leader>ga", align_to_string, { noremap = true, silent = true })
+    end
+  },
+
   -- Reopen files to last edited line
   {
     "farmergreg/vim-lastplace",
@@ -311,22 +341,25 @@ require("lazy").setup({
           "go", 
           "hcl",
           "javascript",
+          "just",
           "lua", 
           "markdown", 
           "python", 
+          "query",
           "rust", 
           "svelte",
           "terraform", 
           "tsx",
           "typescript",
           "vim", 
+          "vimdoc",
         },
         highlight = {
           enable = true,
           additional_vim_regex_highlighting = false,
         },
         indent = {
-          enable = true,
+          enable = false,
         },
       })
     end
@@ -346,6 +379,10 @@ require("lazy").setup({
       vim.keymap.set("n", "[d", vim.diagnostic.goto_prev)
       vim.keymap.set("n", "]d", vim.diagnostic.goto_next)
 
+      local disable_lsp = function()
+        vim.lsp.stop_client(vim.lsp.get_active_clients())
+      end
+
       -- Apply configs on LSP attach to buffer
       vim.api.nvim_create_autocmd("LspAttach", {
         callback = function(event)
@@ -361,6 +398,7 @@ require("lazy").setup({
           vim.keymap.set("n", "<leader>lf", vim.lsp.buf.format, opts)
           vim.keymap.set("n", "<leader>a", vim.lsp.buf.code_action, opts)
           vim.keymap.set("n", "<leader>lr", "<cmd>LspRestart<cr>", opts)
+          vim.keymap.set('n', '<leader>ld', disable_lsp, opts)
 
           -- auto-format on save
           vim.api.nvim_create_autocmd("BufWritePre", {
@@ -418,34 +456,41 @@ require("lazy").setup({
           default_setup,
         },
         ensure_installed = {
+          "gopls",
           "pyright",
           "ruff_lsp",
           "rust_analyzer",
+          "tailwindcss",
+          "ts_ls",
         },
       })
 
       -- Language configs
       local lspconfig = require("lspconfig")
 
-      -- Python
-      require('lspconfig').ruff_lsp.setup {
-        init_options = {
-          settings = {
-            args = {},
-          }
-        }
-      }
+      -- Golang
+      lspconfig.gopls.setup({})
 
-      require'lspconfig'.pyright.setup{
+      -- Python
+      lspconfig.pyright.setup({
         settings = {
           python = {
-            pythonPath = vim.fn.getenv('CONDA_PREFIX') and (vim.fn.getenv('CONDA_PREFIX') .. '/bin/python') or vim.fn.getenv('PYRIGHT_PYTHON')
-          }
+            analysis = {
+              exclude = {"**", "*", "**/*"},
+            },
+            pythonPath = os.getenv('VIRTUAL_ENV') and (os.getenv('VIRTUAL_ENV') .. '/bin/python') or os.getenv('PYRIGHT_PYTHON'),
+          },
         },
-        on_init = function(client)
-          vim.notify("Python Path: " .. client.config.settings.python.pythonPath)
-        end
-      }
+      })
+
+      lspconfig.ruff_lsp.setup({
+        settings = {
+          lint = {
+            -- only use ruff for formatting
+            enable = false,
+          }
+        }
+      })
 
       -- Rust
       lspconfig.rust_analyzer.setup({
@@ -455,6 +500,24 @@ require("lazy").setup({
             cargo = {
               features = "all",
             },
+            imports = {
+              granularity = {
+                group = "module",
+              },
+            },
+          },
+        },
+      })
+
+      -- Typescript
+      lspconfig.ts_ls.setup({
+        settings = {
+          typescript = {
+            format = {
+              tabSize = 2,
+              indentSize = 2,
+              convertTabsToSpaces = true,
+            }
           },
         },
       })

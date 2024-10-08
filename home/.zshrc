@@ -40,8 +40,23 @@ alias gc='f() { git checkout "$@" }; f'
 alias gbd='f() { git branch -D "$@" }; f'
 alias gitsub="git submodule update --init --recursive"
 
+gb () {
+  branch_name=$1
+  if git show-ref --verify --quiet refs/heads/"$branch_name"; then
+    git branch -D "$branch_name"
+  fi
+  git checkout -b "$branch_name"
+}
+
 # cargo
-alias ck='clear; cargo check --all-features'
+local cargo_args='--all-features --all-targets'
+alias ck="clear; cargo check $cargo_args"
+alias clippy="clear; cargo clippy $cargo_args"
+alias cargall="clear; cargo check $cargo_args && cargo clippy $cargo_args && cargo test"
+
+# go
+export GOPATH="$HOME/go"
+export PATH="$GOPATH/bin:$PATH"
 
 # Docker
 export DOCKER_BUILDKIT=1
