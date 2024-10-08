@@ -120,26 +120,33 @@ vim.api.nvim_create_autocmd(
 --------------------
 -- Hotkeys
 --------------------
+opts = { noremap = true, silent = true }
 
 -- Clear highlights
-vim.keymap.set("n", "<C-z>", "<cmd>nohlsearch<cr>")
+vim.keymap.set("n", "<C-z>", "<cmd>nohlsearch<cr>", opts)
 -- New file
-vim.keymap.set("n", "<leader>n", "<cmd>enew<cr>")
+vim.keymap.set("n", "<leader>n", "<cmd>enew<cr>", opts)
 -- Save file
-vim.keymap.set("n", "<leader>w", "<cmd>w<cr>")
+vim.keymap.set("n", "<leader>w", "<cmd>w<cr>", opts)
 -- Close all
-vim.keymap.set("", "<C-q>", "<cmd>confirm qall<cr>")
+vim.keymap.set("", "<C-q>", "<cmd>confirm qall<cr>", opts)
 
 -- Copy to clipboard
-vim.keymap.set("", "<leader>c", '"+y')
-vim.keymap.set("v", "<leader>c", '"+y')
+vim.keymap.set("", "<leader>c", '"+y', opts)
+vim.keymap.set("v", "<leader>c", '"+y', opts)
 
 -- Show and hide invisible characters
-vim.keymap.set("n", "<leader>c", "<cmd>set invlist<cr>")
+vim.keymap.set("n", "<leader>c", "<cmd>set invlist<cr>", opts)
 
 -- Fix pasted slack snippets
-vim.keymap.set("n", "<leader>sk", "<cmd>%s/​//g<cr>")
+vim.keymap.set("n", "<leader>sk", "<cmd>%s/​//g<cr>", opts)
 
+-- scroll to the bottom of the document and center the context of the window on the last line
+function scroll_and_center_bottom()
+    vim.cmd('normal! G')
+    vim.cmd('normal! zz')
+end
+vim.keymap.set('n', '<leader>b', scroll_and_center_bottom, opts)
 
 --------------------
 -- Plugins
