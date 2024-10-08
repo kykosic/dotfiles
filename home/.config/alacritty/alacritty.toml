@@ -135,6 +135,11 @@ chars = "\u0001j"
 key = "D"
 mods = "Command|Shift"
 
+[[keyboard.bindings]]
+chars = "\u0001s"
+key = "S"
+mods = "Command"
+
 [shell]
 args = ["-l", "-c", "/opt/homebrew/bin/tmux new-session -A -s main"]
 program = "/bin/zsh"
