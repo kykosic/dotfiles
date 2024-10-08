@@ -63,7 +63,7 @@ vim.api.nvim_create_autocmd(
       "go",
       "make",
     },
-    command = "setlocal noexpandtab shiftwidth=8 softtabstop=8",
+    command = "setlocal noexpandtab tabstop=4 shiftwidth=4 softtabstop=4",
   }
 )
 
