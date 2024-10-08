@@ -46,7 +46,6 @@ vim.api.nvim_create_autocmd(
     pattern = { 
       "javascript",
       "lua",
-      "svelte",
       "terraform",
       "typescript",
       "typescriptreact",
