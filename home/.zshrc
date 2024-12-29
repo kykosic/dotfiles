@@ -36,11 +36,9 @@ alias colima-start='colima start --cpu 4 --memory 8 --arch x86_64'
 alias flush-dns='sudo dscacheutil -flushcache; sudo killall -HUP mDNSResponder'
 
 # git
-alias gc='f() { git checkout "$@" }; f'
-alias gbd='f() { git branch -D "$@" }; f'
-alias gitsub="git submodule update --init --recursive"
+alias git-sub="git submodule update --init --recursive"
 
-gb () {
+git-take () {
   branch_name=$1
   if git show-ref --verify --quiet refs/heads/"$branch_name"; then
     git branch -D "$branch_name"

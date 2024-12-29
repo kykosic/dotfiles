@@ -313,9 +313,8 @@ require("lazy").setup({
     branch = "v2",
     init = function()
       local align_to_string = function()
-        require("align").align_to_string({
-          preview = true,
-          regex = false,
+        require("align").align_to_char({
+          length = 1
         })
       end
       vim.keymap.set("x", "<leader>ga", align_to_string, { noremap = true, silent = true })
@@ -465,7 +464,7 @@ require("lazy").setup({
         ensure_installed = {
           "gopls",
           "pyright",
-          "ruff_lsp",
+          "ruff",
           "rust_analyzer",
           "tailwindcss",
           "ts_ls",
@@ -490,7 +489,7 @@ require("lazy").setup({
         },
       })
 
-      lspconfig.ruff_lsp.setup({
+      lspconfig.ruff.setup({
         settings = {
           lint = {
             -- only use ruff for formatting
