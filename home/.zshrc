@@ -14,6 +14,7 @@ ZSH_DISABLE_COMPFIX=true
 CASE_SENSITIVE="true"
 HIST_STAMPS="yyyy-mm-dd"
 ZSH_THEME="powerlevel10k/powerlevel10k"
+DISABLE_AUTO_UPDATE=true
 source $ZSH/oh-my-zsh.sh
 
 # ECR Login
@@ -63,7 +64,7 @@ export DOCKER_BUILDKIT=1
 alias k=kubectl
 alias kc="kubectl config current-context"
 alias kctx="kubectl config use-context"
-alias kns='f() { kubectl config set-context --current --namespace="$1" }; f'
+alias kns='fn() { kubectl config set-context --current --namespace="$1" }; fn'
 export KUBE_EDITOR=nvim
 # source <(kubectl completion zsh)
 

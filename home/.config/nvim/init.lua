@@ -576,12 +576,11 @@ require("lazy").setup({
             end
           end, { "i", "s"}),
         }),
-        sources = cmp.config.sources({
-          { name = "nvim_lsp", entry_filter = nvim_lsp_entry_filter },
-          { name = "path" },
-        }, {
-          { name = "buffer" },
-        }),
+        sources = {
+          { name = "nvim_lsp", priority = 1000, entry_filter = nvim_lsp_entry_filter },
+          { name = "buffer", priority = 500 },
+          { name = "path", priority = 100 },
+        },
         experimental = {
           ghost_text = false,
         },
