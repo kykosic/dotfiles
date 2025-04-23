@@ -321,6 +321,30 @@ require("lazy").setup({
     end
   },
 
+  {
+    "smoka7/multicursors.nvim",
+    event = "VeryLazy",
+    dependencies = {
+      'nvimtools/hydra.nvim',
+    },
+    opts = {},
+    cmd = { 'MCstart', 'MCvisual', 'MCclear', 'MCpattern', 'MCvisualPattern', 'MCunderCursor' },
+    keys = {
+      {
+        mode = { 'v', 'n' },
+        '<Leader>m',
+        '<cmd>MCstart<cr>',
+        desc = 'Create a selection for selected text or word under the cursor',
+      },
+      {
+        mode = { 'n' },
+        '<Leader>f',
+        '<cmd>MCpattern<cr>',
+        desc = 'Prompts for a pattern and selects every match in the buffer.',
+      },
+    },
+  },
+
   -- Reopen files to last edited line
   {
     "farmergreg/vim-lastplace",
@@ -410,7 +434,10 @@ require("lazy").setup({
           vim.api.nvim_create_autocmd("BufWritePre", {
             buffer = event.buf,
             callback = function()
-              vim.lsp.buf.format({ async = false, id = event.data.client_id })
+              local clients = vim.lsp.get_clients({ bufnr = event.buf })
+              if #clients > 0 then
+                vim.lsp.buf.format({ async = false, id = event.data.client_id })
+              end
             end
           })
 

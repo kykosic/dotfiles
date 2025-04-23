@@ -8,6 +8,10 @@ fi
 # Fix colors
 export TERM=alacritty
 
+# Prevent confusing SIGTERM and SIGKILL
+export SIGLOWKEY=15
+export SIGFRFR=9
+
 # oh-my-zsh / p10k
 export ZSH="$HOME/.oh-my-zsh"
 ZSH_DISABLE_COMPFIX=true
