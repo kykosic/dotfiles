@@ -36,14 +36,14 @@ vim.opt.undofile = true
 
 -- Tabs/spaces settings, default to 4 spaces
 vim.opt.expandtab = true
-vim.opt.tabstop = 8 
+vim.opt.tabstop = 8
 vim.opt.softtabstop = 4
 vim.opt.shiftwidth = 4
 -- Override some filetypes for 2 spaces
 vim.api.nvim_create_autocmd(
   "FileType",
   {
-    pattern = { 
+    pattern = {
       "javascript",
       "lua",
       "terraform",
@@ -61,6 +61,7 @@ vim.api.nvim_create_autocmd(
     pattern = {
       "go",
       "make",
+      "proto",
     },
     command = "setlocal noexpandtab tabstop=4 shiftwidth=4 softtabstop=4",
   }
@@ -71,6 +72,16 @@ vim.filetype.add({
   extension = {
     tfvars = "hcl",
   },
+})
+
+-- Trim trailing whitespace on save
+vim.api.nvim_create_autocmd("BufWritePre", {
+  pattern = "*",
+  callback = function()
+    local pos = vim.fn.getpos(".")
+    pcall(function() vim.cmd([[%s/\s\+$//e]]) end)
+    vim.fn.setpos(".", pos)
+  end,
 })
 
 -- Enable spellcheck on certain filetypes
@@ -120,26 +131,33 @@ vim.api.nvim_create_autocmd(
 --------------------
 -- Hotkeys
 --------------------
+opts = { noremap = true, silent = true }
 
 -- Clear highlights
-vim.keymap.set("n", "<C-z>", "<cmd>nohlsearch<cr>")
+vim.keymap.set("n", "<C-z>", "<cmd>nohlsearch<cr>", opts)
 -- New file
-vim.keymap.set("n", "<leader>n", "<cmd>enew<cr>")
+vim.keymap.set("n", "<leader>n", "<cmd>enew<cr>", opts)
 -- Save file
-vim.keymap.set("n", "<leader>w", "<cmd>w<cr>")
+vim.keymap.set("n", "<leader>w", "<cmd>w<cr>", opts)
 -- Close all
-vim.keymap.set("", "<C-q>", "<cmd>confirm qall<cr>")
+vim.keymap.set("", "<C-q>", "<cmd>confirm qall<cr>", opts)
 
 -- Copy to clipboard
-vim.keymap.set("", "<leader>c", '"+y')
-vim.keymap.set("v", "<leader>c", '"+y')
+vim.keymap.set("", "<leader>c", '"+y', opts)
+vim.keymap.set("v", "<leader>c", '"+y', opts)
 
 -- Show and hide invisible characters
-vim.keymap.set("n", "<leader>c", "<cmd>set invlist<cr>")
+vim.keymap.set("n", "<leader>c", "<cmd>set invlist<cr>", opts)
 
 -- Fix pasted slack snippets
-vim.keymap.set("n", "<leader>sk", "<cmd>%s/​//g<cr>")
+vim.keymap.set("n", "<leader>sk", "<cmd>%s/​//g<cr>", opts)
 
+-- scroll to the bottom of the document and center the context of the window on the last line
+function scroll_and_center_bottom()
+    vim.cmd('normal! G')
+    vim.cmd('normal! zz')
+end
+vim.keymap.set('n', '<leader>b', scroll_and_center_bottom, opts)
 
 --------------------
 -- Plugins
@@ -182,7 +200,7 @@ require("lazy").setup({
   {
     "nvim-lualine/lualine.nvim",
     lazy = false,
-    dependencies = { 
+    dependencies = {
       "nvim-tree/nvim-web-devicons",
       "linrongbin16/lsp-progress.nvim",
     },
@@ -288,9 +306,9 @@ require("lazy").setup({
   },
 
   -- Indentation visual guides
-  { 
-    "lukas-reineke/indent-blankline.nvim", 
-    main = "ibl", 
+  {
+    "lukas-reineke/indent-blankline.nvim",
+    main = "ibl",
     config = function()
       require("ibl").setup({
         scope = {
@@ -306,9 +324,8 @@ require("lazy").setup({
     branch = "v2",
     init = function()
       local align_to_string = function()
-        require("align").align_to_string({
-          preview = true,
-          regex = false,
+        require("align").align_to_char({
+          length = 1
         })
       end
       vim.keymap.set("x", "<leader>ga", align_to_string, { noremap = true, silent = true })
@@ -327,31 +344,31 @@ require("lazy").setup({
 
   -- Treesitter syntax highlighting
   {
-    "nvim-treesitter/nvim-treesitter", 
+    "nvim-treesitter/nvim-treesitter",
     -- dependencies = {
     --   "hiphish/rainbow-delimiters.nvim",
     -- },
     build = ":TSUpdate",
     config = function()
       require("nvim-treesitter.configs").setup({
-        ensure_installed = { 
-          "c", 
-          "comment", 
-          "cpp", 
-          "go", 
+        ensure_installed = {
+          "c",
+          "comment",
+          "cpp",
+          "go",
           "hcl",
           "javascript",
           "just",
-          "lua", 
-          "markdown", 
-          "python", 
+          "lua",
+          "markdown",
+          "python",
           "query",
-          "rust", 
+          "rust",
           "svelte",
-          "terraform", 
+          "terraform",
           "tsx",
           "typescript",
-          "vim", 
+          "vim",
           "vimdoc",
         },
         highlight = {
@@ -403,8 +420,15 @@ require("lazy").setup({
           -- auto-format on save
           vim.api.nvim_create_autocmd("BufWritePre", {
             buffer = event.buf,
-            callback = function()
-              vim.lsp.buf.format({ async = false, id = event.data.client_id })
+            callback = function(args)
+              vim.lsp.buf.format({
+                bufnr = args.buf,
+                timeout_ms = 3000,
+                async = false,
+                filter = function(client)
+                  return client.supports_method("textDocument/formatting")
+                end,
+              })
             end
           })
 
@@ -415,10 +439,10 @@ require("lazy").setup({
         end
       })
 
-      vim.diagnostic.config({ 
+      vim.diagnostic.config({
         -- Don't show inline diagnostic messages
-        virtual_text = false,  
-        severity_sort = true, 
+        virtual_text = false,
+        severity_sort = true,
       })
 
       -- Show diagnostic messsages on hover
@@ -458,11 +482,12 @@ require("lazy").setup({
         ensure_installed = {
           "gopls",
           "pyright",
-          "ruff_lsp",
+          "ruff",
           "rust_analyzer",
           "tailwindcss",
           "ts_ls",
         },
+        automatic_enable = false,
       })
 
       -- Language configs
@@ -483,7 +508,7 @@ require("lazy").setup({
         },
       })
 
-      lspconfig.ruff_lsp.setup({
+      lspconfig.ruff.setup({
         settings = {
           lint = {
             -- only use ruff for formatting
@@ -536,7 +561,7 @@ require("lazy").setup({
     },
     config = function()
       local cmp = require("cmp")
-      
+
       -- function to filter completion suggestions
       local nvim_lsp_entry_filter = function(entry, ctx)
         return cmp.lsp.CompletionItemKind.Keyword ~= entry:get_kind()
@@ -570,12 +595,11 @@ require("lazy").setup({
             end
           end, { "i", "s"}),
         }),
-        sources = cmp.config.sources({
-          { name = "nvim_lsp", entry_filter = nvim_lsp_entry_filter },
-          { name = "path" },
-        }, {
-          { name = "buffer" },
-        }),
+        sources = {
+          { name = "nvim_lsp", priority = 1000, entry_filter = nvim_lsp_entry_filter },
+          { name = "buffer", priority = 500 },
+          { name = "path", priority = 100 },
+        },
         experimental = {
           ghost_text = false,
         },

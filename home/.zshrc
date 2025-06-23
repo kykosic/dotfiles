@@ -8,12 +8,17 @@ fi
 # Fix colors
 export TERM=alacritty
 
+# Prevent confusing SIGTERM and SIGKILL
+export SIGLOWKEY=15
+export SIGFRFR=9
+
 # oh-my-zsh / p10k
 export ZSH="$HOME/.oh-my-zsh"
 ZSH_DISABLE_COMPFIX=true
 CASE_SENSITIVE="true"
 HIST_STAMPS="yyyy-mm-dd"
 ZSH_THEME="powerlevel10k/powerlevel10k"
+DISABLE_AUTO_UPDATE=true
 source $ZSH/oh-my-zsh.sh
 
 # ECR Login
@@ -36,11 +41,9 @@ alias colima-start='colima start --cpu 4 --memory 8 --arch x86_64'
 alias flush-dns='sudo dscacheutil -flushcache; sudo killall -HUP mDNSResponder'
 
 # git
-alias gc='f() { git checkout "$@" }; f'
-alias gbd='f() { git branch -D "$@" }; f'
-alias gitsub="git submodule update --init --recursive"
+alias git-sub="git submodule update --init --recursive"
 
-gb () {
+git-take () {
   branch_name=$1
   if git show-ref --verify --quiet refs/heads/"$branch_name"; then
     git branch -D "$branch_name"
@@ -51,6 +54,8 @@ gb () {
 # cargo
 local cargo_args='--all-features --all-targets'
 alias ck="clear; cargo check $cargo_args"
+alias ckx="clear; cargo check $cargo_args --target x86_64-unknown-linux-gnu"
+alias cka="clear; cargo check $cargo_args --target aarch64-unknown-linux-gnu"
 alias clippy="clear; cargo clippy $cargo_args"
 alias cargall="clear; cargo check $cargo_args && cargo clippy $cargo_args && cargo test"
 
@@ -65,7 +70,7 @@ export DOCKER_BUILDKIT=1
 alias k=kubectl
 alias kc="kubectl config current-context"
 alias kctx="kubectl config use-context"
-alias kns='f() { kubectl config set-context --current --namespace="$1" }; f'
+alias kns='fn() { kubectl config set-context --current --namespace="$1" }; fn'
 export KUBE_EDITOR=nvim
 # source <(kubectl completion zsh)
 
@@ -124,7 +129,7 @@ if [ -e "$HOME/.config/PERSONAL" ]; then
     unset __conda_setup
     # <<< conda initialize <<<
     conda activate dev
-fi 
+fi
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
