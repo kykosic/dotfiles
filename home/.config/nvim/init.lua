@@ -36,14 +36,14 @@ vim.opt.undofile = true
 
 -- Tabs/spaces settings, default to 4 spaces
 vim.opt.expandtab = true
-vim.opt.tabstop = 8 
+vim.opt.tabstop = 8
 vim.opt.softtabstop = 4
 vim.opt.shiftwidth = 4
 -- Override some filetypes for 2 spaces
 vim.api.nvim_create_autocmd(
   "FileType",
   {
-    pattern = { 
+    pattern = {
       "javascript",
       "lua",
       "terraform",
@@ -61,6 +61,7 @@ vim.api.nvim_create_autocmd(
     pattern = {
       "go",
       "make",
+      "proto",
     },
     command = "setlocal noexpandtab tabstop=4 shiftwidth=4 softtabstop=4",
   }
@@ -71,6 +72,16 @@ vim.filetype.add({
   extension = {
     tfvars = "hcl",
   },
+})
+
+-- Trim trailing whitespace on save
+vim.api.nvim_create_autocmd("BufWritePre", {
+  pattern = "*",
+  callback = function()
+    local pos = vim.fn.getpos(".")
+    pcall(function() vim.cmd([[%s/\s\+$//e]]) end)
+    vim.fn.setpos(".", pos)
+  end,
 })
 
 -- Enable spellcheck on certain filetypes
@@ -189,7 +200,7 @@ require("lazy").setup({
   {
     "nvim-lualine/lualine.nvim",
     lazy = false,
-    dependencies = { 
+    dependencies = {
       "nvim-tree/nvim-web-devicons",
       "linrongbin16/lsp-progress.nvim",
     },
@@ -295,9 +306,9 @@ require("lazy").setup({
   },
 
   -- Indentation visual guides
-  { 
-    "lukas-reineke/indent-blankline.nvim", 
-    main = "ibl", 
+  {
+    "lukas-reineke/indent-blankline.nvim",
+    main = "ibl",
     config = function()
       require("ibl").setup({
         scope = {
@@ -357,31 +368,31 @@ require("lazy").setup({
 
   -- Treesitter syntax highlighting
   {
-    "nvim-treesitter/nvim-treesitter", 
+    "nvim-treesitter/nvim-treesitter",
     -- dependencies = {
     --   "hiphish/rainbow-delimiters.nvim",
     -- },
     build = ":TSUpdate",
     config = function()
       require("nvim-treesitter.configs").setup({
-        ensure_installed = { 
-          "c", 
-          "comment", 
-          "cpp", 
-          "go", 
+        ensure_installed = {
+          "c",
+          "comment",
+          "cpp",
+          "go",
           "hcl",
           "javascript",
           "just",
-          "lua", 
-          "markdown", 
-          "python", 
+          "lua",
+          "markdown",
+          "python",
           "query",
-          "rust", 
+          "rust",
           "svelte",
-          "terraform", 
+          "terraform",
           "tsx",
           "typescript",
-          "vim", 
+          "vim",
           "vimdoc",
         },
         highlight = {
@@ -448,10 +459,10 @@ require("lazy").setup({
         end
       })
 
-      vim.diagnostic.config({ 
+      vim.diagnostic.config({
         -- Don't show inline diagnostic messages
-        virtual_text = false,  
-        severity_sort = true, 
+        virtual_text = false,
+        severity_sort = true,
       })
 
       -- Show diagnostic messsages on hover
@@ -569,7 +580,7 @@ require("lazy").setup({
     },
     config = function()
       local cmp = require("cmp")
-      
+
       -- function to filter completion suggestions
       local nvim_lsp_entry_filter = function(entry, ctx)
         return cmp.lsp.CompletionItemKind.Keyword ~= entry:get_kind()

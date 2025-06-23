@@ -54,6 +54,8 @@ git-take () {
 # cargo
 local cargo_args='--all-features --all-targets'
 alias ck="clear; cargo check $cargo_args"
+alias ckx="clear; cargo check $cargo_args --target x86_64-unknown-linux-gnu"
+alias cka="clear; cargo check $cargo_args --target aarch64-unknown-linux-gnu"
 alias clippy="clear; cargo clippy $cargo_args"
 alias cargall="clear; cargo check $cargo_args && cargo clippy $cargo_args && cargo test"
 
@@ -127,7 +129,9 @@ if [ -e "$HOME/.config/PERSONAL" ]; then
     unset __conda_setup
     # <<< conda initialize <<<
     conda activate dev
-fi 
+fi
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+
+. "$HOME/.local/bin/env"
