@@ -444,11 +444,15 @@ require("lazy").setup({
           -- auto-format on save
           vim.api.nvim_create_autocmd("BufWritePre", {
             buffer = event.buf,
-            callback = function()
-              local clients = vim.lsp.get_clients({ bufnr = event.buf })
-              if #clients > 0 then
-                vim.lsp.buf.format({ async = false, id = event.data.client_id })
-              end
+            callback = function(args)
+              vim.lsp.buf.format({
+                bufnr = args.buf,
+                timeout_ms = 3000,
+                async = false,
+                filter = function(client)
+                  return client.supports_method("textDocument/formatting")
+                end,
+              })
             end
           })
 
@@ -507,6 +511,7 @@ require("lazy").setup({
           "tailwindcss",
           "ts_ls",
         },
+        automatic_enable = false,
       })
 
       -- Language configs
