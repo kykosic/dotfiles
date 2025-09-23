@@ -497,8 +497,7 @@ require("lazy").setup({
           basedpyright = {
             analysis = {
               diagnosticMode = "openFilesOnly",
-              autoSearchPaths = false,
-              useLibraryCodeForTypes = true,
+              typeCheckingMode = "standard",
               exclude = {"**", "*", "**/*"},
             },
           },
