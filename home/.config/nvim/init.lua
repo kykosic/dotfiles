@@ -482,7 +482,7 @@ require("lazy").setup({
         ensure_installed = {
           "gopls",
           "pyright",
-          "ruff",
+          -- "ruff",
           "rust_analyzer",
           "tailwindcss",
           "ts_ls",
@@ -508,14 +508,14 @@ require("lazy").setup({
         },
       })
 
-      lspconfig.ruff.setup({
-        settings = {
-          lint = {
-            -- only use ruff for formatting
-            enable = false,
-          }
-        }
-      })
+      -- lspconfig.ruff.setup({
+      --   settings = {
+      --     lint = {
+      --       -- only use ruff for formatting
+      --       enable = false,
+      --     }
+      --   }
+      -- })
 
       -- Rust
       lspconfig.rust_analyzer.setup({
