@@ -44,6 +44,7 @@ alias ez='exec zsh'
 # git
 alias gs="git status"
 alias git-sub="git submodule update --init --recursive"
+alias grg="git ls-files | rg"
 
 git-take () {
   branch_name=$1

@@ -387,7 +387,7 @@ require("lazy").setup({
     "stevearc/conform.nvim",
     opts = {
       formatters_by_ft = {
-        python = { "ruff_fix", "ruff_format", "ruff_organize_imports" },
+        python = { "ruff_format", "ruff_organize_imports" },
         rust   = { "rustfmt" },
       },
       format_on_save = { lsp_fallback = false, timeout_ms = 500 },
