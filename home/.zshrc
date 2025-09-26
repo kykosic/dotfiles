@@ -39,9 +39,12 @@ alias kill-tmux='tmux kill-session -a'
 alias source-tmux='tmux source-file ~/.tmux.conf'
 alias colima-start='colima start --cpu 4 --memory 8 --arch x86_64'
 alias flush-dns='sudo dscacheutil -flushcache; sudo killall -HUP mDNSResponder'
+alias ez='exec zsh'
 
 # git
+alias gs="git status"
 alias git-sub="git submodule update --init --recursive"
+alias grg="git ls-files | rg"
 
 git-take () {
   branch_name=$1
@@ -58,6 +61,7 @@ alias ckx="clear; cargo check $cargo_args --target x86_64-unknown-linux-gnu"
 alias cka="clear; cargo check $cargo_args --target aarch64-unknown-linux-gnu"
 alias clippy="clear; cargo clippy $cargo_args"
 alias cargall="clear; cargo check $cargo_args && cargo clippy $cargo_args && cargo test"
+alias clean-all='cd ~/code; find . -name target -type d -exec cargo clean --manifest-path {}/../Cargo.toml \;'
 
 # go
 export GOPATH="$HOME/go"
@@ -68,7 +72,7 @@ export DOCKER_BUILDKIT=1
 
 # Kubernetes
 alias k=kubectl
-alias kc="kubectl config current-context"
+alias kcc="kubectl config current-context"
 alias kctx="kubectl config use-context"
 alias kns='fn() { kubectl config set-context --current --namespace="$1" }; fn'
 export KUBE_EDITOR=nvim

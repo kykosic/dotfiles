@@ -382,6 +382,18 @@ require("lazy").setup({
     end
   },
 
+  -- Auto-formatting
+  {
+    "stevearc/conform.nvim",
+    opts = {
+      formatters_by_ft = {
+        python = { "ruff_format", "ruff_organize_imports" },
+        rust   = { "rustfmt" },
+      },
+      format_on_save = { lsp_fallback = false, timeout_ms = 500 },
+    },
+  },
+
   -- LSP
   {
     "neovim/nvim-lspconfig",
@@ -391,6 +403,10 @@ require("lazy").setup({
       "williamboman/mason-lspconfig.nvim",
     },
     config = function()
+      local lspconfig = require("lspconfig")
+      local util = require("lspconfig.util")
+      local capabilities = require("cmp_nvim_lsp").default_capabilities()
+
       -- Global mappings
       vim.keymap.set("n", "gl", vim.diagnostic.open_float)
       vim.keymap.set("n", "[d", vim.diagnostic.goto_prev)
@@ -416,21 +432,6 @@ require("lazy").setup({
           vim.keymap.set("n", "<leader>a", vim.lsp.buf.code_action, opts)
           vim.keymap.set("n", "<leader>lr", "<cmd>LspRestart<cr>", opts)
           vim.keymap.set('n', '<leader>ld', disable_lsp, opts)
-
-          -- auto-format on save
-          vim.api.nvim_create_autocmd("BufWritePre", {
-            buffer = event.buf,
-            callback = function(args)
-              vim.lsp.buf.format({
-                bufnr = args.buf,
-                timeout_ms = 3000,
-                async = false,
-                filter = function(client)
-                  return client.supports_method("textDocument/formatting")
-                end,
-              })
-            end
-          })
 
           -- no semantic tokens please, just use treesitter
           local client = vim.lsp.get_client_by_id(event.data.client_id)
@@ -466,13 +467,6 @@ require("lazy").setup({
         end
       })
 
-      local capabilities = require("cmp_nvim_lsp").default_capabilities()
-      local default_setup = function(server)
-        require("lspconfig")[server].setup({
-          capabilities = capabilities,
-        })
-      end
-
       -- Server manager
       require("mason").setup()
       require("mason-lspconfig").setup({
@@ -481,7 +475,7 @@ require("lazy").setup({
         },
         ensure_installed = {
           "gopls",
-          "pyright",
+          "basedpyright",
           "ruff",
           "rust_analyzer",
           "tailwindcss",
@@ -491,30 +485,40 @@ require("lazy").setup({
       })
 
       -- Language configs
-      local lspconfig = require("lspconfig")
 
       -- Golang
-      lspconfig.gopls.setup({})
+      lspconfig.gopls.setup({ capabilities = capabilities })
 
       -- Python
-      lspconfig.pyright.setup({
+      lspconfig.basedpyright.setup({
+        capabilities = capabilities,
+        single_file_support = true,
         settings = {
-          python = {
+          basedpyright = {
             analysis = {
+              diagnosticMode = "openFilesOnly",
+              typeCheckingMode = "standard",
               exclude = {"**", "*", "**/*"},
             },
+          },
+          python = {
             pythonPath = os.getenv('VIRTUAL_ENV') and (os.getenv('VIRTUAL_ENV') .. '/bin/python') or os.getenv('PYRIGHT_PYTHON'),
           },
         },
       })
 
       lspconfig.ruff.setup({
-        settings = {
-          lint = {
-            -- only use ruff for formatting
-            enable = false,
-          }
-        }
+        capabilities = capabilities,
+        init_options = {
+          settings = {
+            configuratinPreference = "filesystemFrist",
+            logLevel = "error",
+          },
+        },
+        on_attach = function(client, _)
+          -- delegate to basedpyright
+          client.server_capabilities.hoverProvider = false
+        end,
       })
 
       -- Rust
@@ -536,15 +540,8 @@ require("lazy").setup({
 
       -- Typescript
       lspconfig.ts_ls.setup({
-        settings = {
-          typescript = {
-            format = {
-              tabSize = 2,
-              indentSize = 2,
-              convertTabsToSpaces = true,
-            }
-          },
-        },
+        capabilities = capabilities,
+        settings = {},
       })
 
     end
