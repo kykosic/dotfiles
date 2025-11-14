@@ -46,6 +46,7 @@ vim.api.nvim_create_autocmd(
     pattern = {
       "javascript",
       "lua",
+      "proto",
       "terraform",
       "typescript",
       "typescriptreact",
@@ -61,7 +62,6 @@ vim.api.nvim_create_autocmd(
     pattern = {
       "go",
       "make",
-      "proto",
     },
     command = "setlocal noexpandtab tabstop=4 shiftwidth=4 softtabstop=4",
   }
