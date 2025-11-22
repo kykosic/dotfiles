@@ -40,6 +40,7 @@ alias source-tmux='tmux source-file ~/.tmux.conf'
 alias colima-start='colima start --cpu 4 --memory 8 --arch x86_64'
 alias flush-dns='sudo dscacheutil -flushcache; sudo killall -HUP mDNSResponder'
 alias ez='exec zsh'
+alias sv=supervisorctl
 
 # git
 alias gs="git status"
