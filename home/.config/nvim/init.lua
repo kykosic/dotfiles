@@ -2,6 +2,16 @@
 vim.keymap.set("n", "<Space>", "<Nop>", { silent = true})
 vim.g.mapleader = " "
 
+-- Supress deprecation warning
+vim.deprecate = (function(original)
+  return function(name, alternative, version, plugin, ...)
+    -- `plugin` == "nvim-lspconfig" for that specific warning
+    if plugin == "nvim-lspconfig" then
+      return
+    end
+    return original(name, alternative, version, plugin, ...)
+  end
+end)(vim.deprecate)
 --------------------
 -- Options
 --------------------
@@ -474,7 +484,7 @@ require("lazy").setup({
           default_setup,
         },
         ensure_installed = {
-          "gopls",
+          -- "gopls",
           "basedpyright",
           "ruff",
           "rust_analyzer",
@@ -487,7 +497,7 @@ require("lazy").setup({
       -- Language configs
 
       -- Golang
-      lspconfig.gopls.setup({ capabilities = capabilities })
+      -- lspconfig.gopls.setup({ capabilities = capabilities })
 
       -- Python
       lspconfig.basedpyright.setup({
