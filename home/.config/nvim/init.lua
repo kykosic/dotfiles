@@ -484,7 +484,7 @@ require("lazy").setup({
           default_setup,
         },
         ensure_installed = {
-          -- "gopls",
+          "gopls",
           "basedpyright",
           "ruff",
           "rust_analyzer",
@@ -497,7 +497,7 @@ require("lazy").setup({
       -- Language configs
 
       -- Golang
-      -- lspconfig.gopls.setup({ capabilities = capabilities })
+      lspconfig.gopls.setup({ capabilities = capabilities })
 
       -- Python
       lspconfig.basedpyright.setup({
