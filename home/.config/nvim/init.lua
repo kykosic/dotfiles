@@ -44,6 +44,14 @@ vim.opt.encoding = "utf-8"
 vim.opt.undodir = vim.fn.expand("~/.vimdid")
 vim.opt.undofile = true
 
+-- Add new filetypes
+vim.filetype.add({
+  extension = {
+    tfvars = "terraform",
+    tf = "terraform",
+  },
+})
+
 -- Tabs/spaces settings, default to 4 spaces
 vim.opt.expandtab = true
 vim.opt.tabstop = 8
@@ -77,12 +85,6 @@ vim.api.nvim_create_autocmd(
   }
 )
 
--- Add new filetypes
-vim.filetype.add({
-  extension = {
-    tfvars = "hcl",
-  },
-})
 
 -- Trim trailing whitespace on save
 vim.api.nvim_create_autocmd("BufWritePre", {
