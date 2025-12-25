@@ -397,13 +397,38 @@ require("lazy").setup({
   -- Auto-formatting
   {
     "stevearc/conform.nvim",
-    opts = {
-      formatters_by_ft = {
-        python = { "ruff_format", "ruff_organize_imports" },
-        rust   = { "rustfmt" },
-      },
-      format_on_save = { lsp_fallback = false, timeout_ms = 500 },
-    },
+    config = function()
+      require("conform").setup({
+        log_level = vim.log.levels.DEBUG,
+        formatters = {
+          force_ruff_format = {
+            command = "ruff",
+            args = { "format", "--isolated", "--stdin-filename", "$FILENAME", "-" },
+            stdin = true,
+          },
+          force_ruff_organize_imports = {
+            command = "ruff",
+            args = {
+              "check",
+              "--isolated",
+              "--fix",
+              "--select=I001",
+              "--exit-zero",
+              "--no-cache",
+              "--stdin-filename",
+              "$FILENAME",
+              "-",
+            },
+            stdin = true,
+          },
+        },
+        formatters_by_ft = {
+          python = { "force_ruff_format", "force_ruff_organize_imports" },
+          rust   = { "rustfmt" },
+        },
+        format_on_save = { timeout_ms = 1000, lsp_format = "fallback" },
+      })
+    end
   },
 
   -- LSP
@@ -488,7 +513,6 @@ require("lazy").setup({
         ensure_installed = {
           "gopls",
           "basedpyright",
-          "ruff",
           "rust_analyzer",
           "tailwindcss",
           "ts_ls",
