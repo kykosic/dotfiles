@@ -1,4 +1,9 @@
+---
+alwaysApply: true
+---
+
 Some general guidelines for coding:
+
 - Never inline `use` statements inside functions, always put them at the top of modules.
 - Cargo.toml dependencies should almost always be flat an alphabetized, not interspaced with comments.
 - Before finishing a task, make sure to run `cargo check`,  then fix any `cargo clippy --all-features --all-targets and finally cargo fmt` at the workspace level. Don't bother about running `cargo test` unless specifically working on tests.
