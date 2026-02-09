@@ -62,9 +62,11 @@ vim.api.nvim_create_autocmd(
   "FileType",
   {
     pattern = {
+      "bash",
       "javascript",
       "lua",
       "proto",
+      "sh",
       "terraform",
       "typescript",
       "typescriptreact",
@@ -424,7 +426,7 @@ require("lazy").setup({
         },
         formatters_by_ft = {
           python = { "force_ruff_format", "force_ruff_organize_imports" },
-          rust   = { "rustfmt" },
+          -- rust   = { "rustfmt" },
         },
         format_on_save = { timeout_ms = 1000, lsp_format = "fallback" },
       })

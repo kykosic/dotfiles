@@ -10,6 +10,7 @@ export SIGLOWKEY=15
 export SIGFRFR=9
 
 # oh-my-zsh / p10k
+export DISABLE_AUTO_UPDATE="true"
 export ZSH="$HOME/.oh-my-zsh"
 ZSH_DISABLE_COMPFIX=true
 CASE_SENSITIVE="true"
@@ -43,6 +44,7 @@ alias sv=supervisorctl
 alias gs="git status"
 alias git-sub="git submodule update --init --recursive"
 alias grg="git ls-files | rg"
+alias pc="pre-commit run --from-ref origin/main --to-ref HEAD"
 
 git-take () {
   branch_name=$1
@@ -60,6 +62,7 @@ alias cka="clear; cargo check $cargo_args --target aarch64-unknown-linux-gnu"
 alias clippy="clear; cargo clippy $cargo_args"
 alias cargall="clear; cargo check $cargo_args && cargo clippy $cargo_args && cargo test"
 alias clean-all='cd ~/code; find . -name target -type d -exec cargo clean --manifest-path {}/../Cargo.toml \;'
+alias tidy="clear; cargo clippy --fix && cargo fmt"
 
 # go
 export GOPATH="$HOME/go"
@@ -73,6 +76,7 @@ alias k=kubectl
 alias kcc="kubectl config current-context"
 alias kctx="kubectl config use-context"
 alias kns='fn() { kubectl config set-context --current --namespace="$1" }; fn'
+alias kw='watch kubectl'
 export KUBE_EDITOR=nvim
 # source <(kubectl completion zsh)
 
