@@ -363,36 +363,32 @@ require("lazy").setup({
     --   "hiphish/rainbow-delimiters.nvim",
     -- },
     build = ":TSUpdate",
+    branch = "main",
     config = function()
-      require("nvim-treesitter.configs").setup({
-        ensure_installed = {
-          "c",
-          "comment",
-          "cpp",
-          "go",
-          "hcl",
-          "javascript",
-          "just",
-          "lua",
-          "markdown",
-          "python",
-          "query",
-          "rust",
-          "svelte",
-          "terraform",
-          "tsx",
-          "typescript",
-          "vim",
-          "vimdoc",
-        },
-        highlight = {
-          enable = true,
-          additional_vim_regex_highlighting = false,
-        },
-        indent = {
-          enable = false,
-        },
-      })
+      local parsers = {
+    "c", "comment", "cpp", "go", "hcl", "javascript", "just", "lua",
+    "markdown", "markdown_inline", "python", "query", "rust", "svelte",
+    "terraform", "tsx", "typescript", "vim", "vimdoc",
+  }
+  -- parser name -> filetype(s); false = injection-only, no FileType trigger
+  local ft_overrides = {
+    tsx = "typescriptreact",
+    vimdoc = "help",
+    comment = false,
+    markdown_inline = false,
+    query = false,
+  }
+  require("nvim-treesitter").install(parsers)
+  local filetypes = {}
+  for _, p in ipairs(parsers) do
+    local ft = ft_overrides[p]
+    if ft == nil then ft = p end
+    if ft then table.insert(filetypes, ft) end
+  end
+  vim.api.nvim_create_autocmd("FileType", {
+    pattern = filetypes,
+    callback = function() vim.treesitter.start() end,
+  })
     end
   },
 
