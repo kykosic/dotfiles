@@ -23,7 +23,6 @@ source $ZSH/oh-my-zsh.sh
 alias ecr-login='eval $\(aws ecr get-login --no-include-email --region us-east-1 \)'
 
 # Brew
-export HOMEBREW_NO_AUTO_UPDATE=1
 if [[ `uname -m` = "arm64" ]]; then
     export PATH="/opt/homebrew/bin:$PATH"
 elif [[ `uname -m` = "x86_64" ]]; then
@@ -74,7 +73,7 @@ export DOCKER_BUILDKIT=1
 # Kubernetes
 alias k=kubectl
 alias kcc="kubectl config current-context"
-alias kctx="kubectl config use-context"
+kctx() { kubectl config use-context "$1" && [[ -n "$2" ]] && kubectl config set-context --current --namespace="$2"; }
 alias kns='fn() { kubectl config set-context --current --namespace="$1" }; fn'
 alias kw='watch kubectl'
 export KUBE_EDITOR=nvim
@@ -104,9 +103,6 @@ alias vi='PYTHONPATH=$(pwd):$PYTHONPATH nvim'
 # Fix screen orientation
 # alias fixscreen='displayplacer ls'
 
-# Private configs
-source $HOME/.private.zsh
-
 # Swap architectures
 function swap {
   if [[ `uname -m` == 'arm64' ]]; then
@@ -131,3 +127,9 @@ fi
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+
+# Private configs
+source $HOME/.private.zsh
+
+# xv package manager
+export PATH="$HOME/.xv/bin:$PATH"

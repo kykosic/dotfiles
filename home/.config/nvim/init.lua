@@ -40,6 +40,25 @@ vim.opt.hidden = true
 vim.opt.viewoptions = "folds,options,cursor,unix,slash"
 vim.opt.encoding = "utf-8"
 
+-- Auto-reload files changed on disk (e.g. by an agent). autoread alone only
+-- triggers on certain events, so poll with checktime on focus/idle/buffer enter.
+vim.opt.autoread = true
+vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter", "CursorHold", "CursorHoldI", "TermClose", "TermLeave" }, {
+  pattern = "*",
+  callback = function()
+    if vim.fn.mode() ~= "c" and vim.fn.getcmdwintype() == "" then
+      vim.cmd("checktime")
+    end
+  end,
+})
+-- Notify when a buffer was reloaded from disk
+vim.api.nvim_create_autocmd("FileChangedShellPost", {
+  pattern = "*",
+  callback = function()
+    vim.notify("File changed on disk; buffer reloaded", vim.log.levels.WARN)
+  end,
+})
+
 -- Permanent undo
 vim.opt.undodir = vim.fn.expand("~/.vimdid")
 vim.opt.undofile = true
