@@ -31,7 +31,7 @@ vim.opt.number = true
 vim.opt.numberwidth = 1
 vim.opt.signcolumn = "yes"
 vim.opt.laststatus = 3
-vim.opt.fillchars:append({ vert = "║", horiz = "═" })
+vim.opt.fillchars:append({ vert = "║", horiz = "═", diff = " " })
 
 -- Misc
 vim.opt.shell = "/bin/zsh"
@@ -662,6 +662,45 @@ require("lazy").setup({
         })
       })
     end
+  },
+
+  -- Git diff review
+  {
+    "sindrets/diffview.nvim",
+    cmd = { "DiffviewOpen", "DiffviewFileHistory", "DiffviewClose" },
+    keys = {
+      -- Uncommitted changes vs HEAD
+      { "<leader>dh", "<cmd>DiffviewOpen<cr>", desc = "Diff: working tree vs HEAD" },
+      -- Branch vs merge-base of upstream main/master (PR-style)
+      {
+        "<leader>dm",
+        function()
+          local function ref_exists(ref)
+            vim.fn.system({ "git", "rev-parse", "--verify", "--quiet", ref })
+            return vim.v.shell_error == 0
+          end
+          local base
+          for _, ref in ipairs({ "origin/main", "origin/master", "main", "master" }) do
+            if ref_exists(ref) then
+              base = ref
+              break
+            end
+          end
+          if not base then
+            vim.notify("No main/master branch found", vim.log.levels.ERROR)
+            return
+          end
+          vim.cmd("DiffviewOpen " .. base .. "...HEAD")
+        end,
+        desc = "Diff: branch vs upstream main/master",
+      },
+    },
+    config = function()
+      -- --imply-local makes the right-hand buffer the file on disk: editable, with LSP
+      require("diffview").setup({
+        default_args = { DiffviewOpen = { "--imply-local" } },
+      })
+    end,
   },
 
 })
