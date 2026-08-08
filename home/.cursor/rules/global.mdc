@@ -1,0 +1,18 @@
+---
+alwaysApply: true
+---
+
+Some general guidelines for coding:
+
+- Never inline `use` statements inside functions, always put them at the top of modules.
+- Cargo.toml dependencies should almost always be flat an alphabetized, not interspaced with comments.
+- Before finishing a task, make sure to run `cargo check`,  then fix any `cargo clippy --all-features --all-targets and finally cargo fmt` at the workspace level. Don't bother about running `cargo test` unless specifically working on tests.
+- Don't put load-bearing code in `lib.rs`, use modules of appropriate names. `lib.rs` should primarily contain module declarations and re-exports.
+- Prefer code that reads top-to-bottom. Eg. my `main.rs` should have `fn main` as the first function, not the last. Follow similar patterns elsewhere.
+- Ensure errors are verbose. Usually prefer `fs_err` to `std::fs`. Always `anyhow::Context` to enrich error messages (when anyhow is appropriate).
+- That which is not necessary is not allowed,.
+- Always simplify. The best change is often to delete. If you don't delete enough to where you occasionally need to undo, you aren't deleting enough.
+- Make things default work. When I run `cargo run` locally, it should run with correct debug flags to test locally. When deployed in cluster, it should work in cluster.
+- Usually print errors as `format!("{err:#}");`
+- Mike Acton, Data Driven Development is good philosophy to adhere to.
+- If you are spawning a thread in Python, you should probably consider writing in Rust.

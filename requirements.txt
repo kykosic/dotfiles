@@ -1,5 +1,0 @@
-neovim
-isort
-black
-ruff
-ruff-lsp

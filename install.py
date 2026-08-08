@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import argparse
 import os
-import subprocess
 from pathlib import Path
 
 ROOT_DIR = Path(__file__).parent.absolute()
@@ -18,7 +17,6 @@ def main():
     args = parser.parse_args()
     symlink_files(args.overwrite)
     touch_private_zsh()
-    install_pip_requirements()
 
 
 def symlink_files(overwrite: bool):
@@ -46,12 +44,6 @@ def touch_private_zsh():
     path = Path("~/.private.zsh").expanduser()
     if not path.exists():
         path.touch()
-
-
-def install_pip_requirements():
-    req = ROOT_DIR / "requirements.txt"
-    print(f"Installing {req}")
-    subprocess.check_call(f"pip install -r {req}", shell=True)
 
 
 if __name__ == "__main__":

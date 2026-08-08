@@ -2,6 +2,16 @@
 vim.keymap.set("n", "<Space>", "<Nop>", { silent = true})
 vim.g.mapleader = " "
 
+-- Supress deprecation warning
+vim.deprecate = (function(original)
+  return function(name, alternative, version, plugin, ...)
+    -- `plugin` == "nvim-lspconfig" for that specific warning
+    if plugin == "nvim-lspconfig" then
+      return
+    end
+    return original(name, alternative, version, plugin, ...)
+  end
+end)(vim.deprecate)
 --------------------
 -- Options
 --------------------
@@ -21,7 +31,7 @@ vim.opt.number = true
 vim.opt.numberwidth = 1
 vim.opt.signcolumn = "yes"
 vim.opt.laststatus = 3
-vim.opt.fillchars:append({ vert = "║", horiz = "═" })
+vim.opt.fillchars:append({ vert = "║", horiz = "═", diff = " " })
 
 -- Misc
 vim.opt.shell = "/bin/zsh"
@@ -30,9 +40,36 @@ vim.opt.hidden = true
 vim.opt.viewoptions = "folds,options,cursor,unix,slash"
 vim.opt.encoding = "utf-8"
 
+-- Auto-reload files changed on disk (e.g. by an agent). autoread alone only
+-- triggers on certain events, so poll with checktime on focus/idle/buffer enter.
+vim.opt.autoread = true
+vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter", "CursorHold", "CursorHoldI", "TermClose", "TermLeave" }, {
+  pattern = "*",
+  callback = function()
+    if vim.fn.mode() ~= "c" and vim.fn.getcmdwintype() == "" then
+      vim.cmd("checktime")
+    end
+  end,
+})
+-- Notify when a buffer was reloaded from disk
+vim.api.nvim_create_autocmd("FileChangedShellPost", {
+  pattern = "*",
+  callback = function()
+    vim.notify("File changed on disk; buffer reloaded", vim.log.levels.WARN)
+  end,
+})
+
 -- Permanent undo
 vim.opt.undodir = vim.fn.expand("~/.vimdid")
 vim.opt.undofile = true
+
+-- Add new filetypes
+vim.filetype.add({
+  extension = {
+    tfvars = "terraform",
+    tf = "terraform",
+  },
+})
 
 -- Tabs/spaces settings, default to 4 spaces
 vim.opt.expandtab = true
@@ -44,9 +81,11 @@ vim.api.nvim_create_autocmd(
   "FileType",
   {
     pattern = {
+      "bash",
       "javascript",
       "lua",
       "proto",
+      "sh",
       "terraform",
       "typescript",
       "typescriptreact",
@@ -67,12 +106,6 @@ vim.api.nvim_create_autocmd(
   }
 )
 
--- Add new filetypes
-vim.filetype.add({
-  extension = {
-    tfvars = "hcl",
-  },
-})
 
 -- Trim trailing whitespace on save
 vim.api.nvim_create_autocmd("BufWritePre", {
@@ -349,49 +382,70 @@ require("lazy").setup({
     --   "hiphish/rainbow-delimiters.nvim",
     -- },
     build = ":TSUpdate",
+    branch = "main",
     config = function()
-      require("nvim-treesitter.configs").setup({
-        ensure_installed = {
-          "c",
-          "comment",
-          "cpp",
-          "go",
-          "hcl",
-          "javascript",
-          "just",
-          "lua",
-          "markdown",
-          "python",
-          "query",
-          "rust",
-          "svelte",
-          "terraform",
-          "tsx",
-          "typescript",
-          "vim",
-          "vimdoc",
-        },
-        highlight = {
-          enable = true,
-          additional_vim_regex_highlighting = false,
-        },
-        indent = {
-          enable = false,
-        },
-      })
+      local parsers = {
+    "c", "comment", "cpp", "go", "hcl", "javascript", "just", "lua",
+    "markdown", "markdown_inline", "python", "query", "rust", "svelte",
+    "terraform", "tsx", "typescript", "vim", "vimdoc",
+  }
+  -- parser name -> filetype(s); false = injection-only, no FileType trigger
+  local ft_overrides = {
+    tsx = "typescriptreact",
+    vimdoc = "help",
+    comment = false,
+    markdown_inline = false,
+    query = false,
+  }
+  require("nvim-treesitter").install(parsers)
+  local filetypes = {}
+  for _, p in ipairs(parsers) do
+    local ft = ft_overrides[p]
+    if ft == nil then ft = p end
+    if ft then table.insert(filetypes, ft) end
+  end
+  vim.api.nvim_create_autocmd("FileType", {
+    pattern = filetypes,
+    callback = function() vim.treesitter.start() end,
+  })
     end
   },
 
   -- Auto-formatting
   {
     "stevearc/conform.nvim",
-    opts = {
-      formatters_by_ft = {
-        python = { "ruff_format", "ruff_organize_imports" },
-        rust   = { "rustfmt" },
-      },
-      format_on_save = { lsp_fallback = false, timeout_ms = 500 },
-    },
+    config = function()
+      require("conform").setup({
+        log_level = vim.log.levels.DEBUG,
+        formatters = {
+          force_ruff_format = {
+            command = "ruff",
+            args = { "format", "--isolated", "--stdin-filename", "$FILENAME", "-" },
+            stdin = true,
+          },
+          force_ruff_organize_imports = {
+            command = "ruff",
+            args = {
+              "check",
+              "--isolated",
+              "--fix",
+              "--select=I001",
+              "--exit-zero",
+              "--no-cache",
+              "--stdin-filename",
+              "$FILENAME",
+              "-",
+            },
+            stdin = true,
+          },
+        },
+        formatters_by_ft = {
+          python = { "force_ruff_format", "force_ruff_organize_imports" },
+          -- rust   = { "rustfmt" },
+        },
+        format_on_save = { timeout_ms = 1000, lsp_format = "fallback" },
+      })
+    end
   },
 
   -- LSP
@@ -476,7 +530,6 @@ require("lazy").setup({
         ensure_installed = {
           "gopls",
           "basedpyright",
-          "ruff",
           "rust_analyzer",
           "tailwindcss",
           "ts_ls",
@@ -609,6 +662,45 @@ require("lazy").setup({
         })
       })
     end
+  },
+
+  -- Git diff review
+  {
+    "sindrets/diffview.nvim",
+    cmd = { "DiffviewOpen", "DiffviewFileHistory", "DiffviewClose" },
+    keys = {
+      -- Uncommitted changes vs HEAD
+      { "<leader>dh", "<cmd>DiffviewOpen<cr>", desc = "Diff: working tree vs HEAD" },
+      -- Branch vs merge-base of upstream main/master (PR-style)
+      {
+        "<leader>dm",
+        function()
+          local function ref_exists(ref)
+            vim.fn.system({ "git", "rev-parse", "--verify", "--quiet", ref })
+            return vim.v.shell_error == 0
+          end
+          local base
+          for _, ref in ipairs({ "origin/main", "origin/master", "main", "master" }) do
+            if ref_exists(ref) then
+              base = ref
+              break
+            end
+          end
+          if not base then
+            vim.notify("No main/master branch found", vim.log.levels.ERROR)
+            return
+          end
+          vim.cmd("DiffviewOpen " .. base .. "...HEAD")
+        end,
+        desc = "Diff: branch vs upstream main/master",
+      },
+    },
+    config = function()
+      -- --imply-local makes the right-hand buffer the file on disk: editable, with LSP
+      require("diffview").setup({
+        default_args = { DiffviewOpen = { "--imply-local" } },
+      })
+    end,
   },
 
 })

@@ -5,14 +5,12 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 
-# Fix colors
-export TERM=alacritty
-
 # Prevent confusing SIGTERM and SIGKILL
 export SIGLOWKEY=15
 export SIGFRFR=9
 
 # oh-my-zsh / p10k
+export DISABLE_AUTO_UPDATE="true"
 export ZSH="$HOME/.oh-my-zsh"
 ZSH_DISABLE_COMPFIX=true
 CASE_SENSITIVE="true"
@@ -25,7 +23,6 @@ source $ZSH/oh-my-zsh.sh
 alias ecr-login='eval $\(aws ecr get-login --no-include-email --region us-east-1 \)'
 
 # Brew
-export HOMEBREW_NO_AUTO_UPDATE=1
 if [[ `uname -m` = "arm64" ]]; then
     export PATH="/opt/homebrew/bin:$PATH"
 elif [[ `uname -m` = "x86_64" ]]; then
@@ -46,6 +43,7 @@ alias sv=supervisorctl
 alias gs="git status"
 alias git-sub="git submodule update --init --recursive"
 alias grg="git ls-files | rg"
+alias pc="pre-commit run --from-ref origin/main --to-ref HEAD"
 
 git-take () {
   branch_name=$1
@@ -63,6 +61,7 @@ alias cka="clear; cargo check $cargo_args --target aarch64-unknown-linux-gnu"
 alias clippy="clear; cargo clippy $cargo_args"
 alias cargall="clear; cargo check $cargo_args && cargo clippy $cargo_args && cargo test"
 alias clean-all='cd ~/code; find . -name target -type d -exec cargo clean --manifest-path {}/../Cargo.toml \;'
+alias tidy="clear; cargo clippy --fix && cargo fmt"
 
 # go
 export GOPATH="$HOME/go"
@@ -74,22 +73,21 @@ export DOCKER_BUILDKIT=1
 # Kubernetes
 alias k=kubectl
 alias kcc="kubectl config current-context"
-alias kctx="kubectl config use-context"
+kctx() { kubectl config use-context "$1" && [[ -n "$2" ]] && kubectl config set-context --current --namespace="$2"; }
 alias kns='fn() { kubectl config set-context --current --namespace="$1" }; fn'
+alias kw='watch kubectl'
 export KUBE_EDITOR=nvim
 # source <(kubectl completion zsh)
 
 # Terraform
 alias tf=terraform
 
-# Pulumi
-alias p=pulumi
+# Python
+export PYTHONUNBUFFERED=1
+export PATH="$HOME/.local/bin:$PATH"
 
 # Rust
 export PATH="$HOME/.cargo/bin:$PATH"
-
-# Python
-export PYTHONUNBUFFERED=1
 
 # Keep separate shell histories for each terminal
 unsetopt inc_append_history
@@ -104,9 +102,6 @@ alias vi='PYTHONPATH=$(pwd):$PYTHONPATH nvim'
 
 # Fix screen orientation
 # alias fixscreen='displayplacer ls'
-
-# Private configs
-source $HOME/.private.zsh
 
 # Swap architectures
 function swap {
@@ -124,12 +119,6 @@ if [ -e "$HOME/.config/PERSONAL" ]; then
     __conda_setup="$("$HOME/miniconda3/bin/conda" 'shell.zsh' 'hook' 2> /dev/null)"
     if [ $? -eq 0 ]; then
         eval "$__conda_setup"
-    else
-        if [ -f "$HOME/miniconda3/etc/profile.d/conda.sh" ]; then
-            . "$HOME/miniconda3/etc/profile.d/conda.sh"
-        else
-            export PATH="$HOME/miniconda3/bin:$PATH"
-        fi
     fi
     unset __conda_setup
     # <<< conda initialize <<<
@@ -138,3 +127,9 @@ fi
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+
+# Private configs
+source $HOME/.private.zsh
+
+# xv package manager
+export PATH="$HOME/.xv/bin:$PATH"
