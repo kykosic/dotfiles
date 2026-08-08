@@ -1,0 +1,1 @@
+../../../.cursor/skills/tech-writing/SKILL.md
