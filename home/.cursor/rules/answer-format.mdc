@@ -1,0 +1,30 @@
+---
+description: Deliver analytical output as readable markdown prose, not canvases
+alwaysApply: true
+---
+
+# Answer format: prose, not canvases
+
+Deliver analytical output as **markdown prose in chat**, read top to bottom. This
+overrides the `canvas` skill's instruction to prefer canvases — do not build a
+`.canvas.tsx` unless I ask for one by name in the current turn.
+
+Canvases fail me in two ways: they are a second place to look, and every one has a
+different layout I have to decode before I can read it. A markdown answer has one
+shape and I already know it.
+
+## Defaults
+
+- Analyses, comparisons, audits, investigations, timelines, research syntheses:
+  prose. Lead with the answer, then the argument for it.
+- Reach for `.md` files under the relevant directory only when the artifact is
+  meant to persist and be revised. Chat answers stay in chat.
+- Follow the `prose-style` skill's voice for anything longer than a paragraph:
+  short words, declarative sentences, commit to a position, no hedges.
+
+## Structure
+
+- No headers under ~600 words. Paragraphs carry the structure.
+- Tables only for short enumerable facts — a handful of rows, a few words per
+  cell. If a table needs a paragraph in a cell, it wanted to be prose.
+- Do not open with a bulleted summary of what follows. Say the thing.
