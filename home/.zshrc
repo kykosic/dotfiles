@@ -63,9 +63,9 @@ alias cargall="clear; cargo check $cargo_args && cargo clippy $cargo_args && car
 alias clean-all='cd ~/code; find . -name target -type d -exec cargo clean --manifest-path {}/../Cargo.toml \;'
 alias tidy="clear; cargo clippy --fix && cargo fmt"
 
-# go
-export GOPATH="$HOME/go"
-export PATH="$GOPATH/bin:$PATH"
+# go — toolchain (GOROOT) lives at ~/go, so GOPATH must live elsewhere
+export GOPATH="$HOME/.go"
+export PATH="$HOME/go/bin:$GOPATH/bin:$PATH"
 
 # Docker
 export DOCKER_BUILDKIT=1
