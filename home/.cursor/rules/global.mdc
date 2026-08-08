@@ -1,18 +1,110 @@
 ---
+description: Kyle's global engineering principles
 alwaysApply: true
 ---
 
-Some general guidelines for coding:
+# Engineering Principles for Coding Agents
 
-- Never inline `use` statements inside functions, always put them at the top of modules.
-- Cargo.toml dependencies should almost always be flat an alphabetized, not interspaced with comments.
-- Before finishing a task, make sure to run `cargo check`,  then fix any `cargo clippy --all-features --all-targets and finally cargo fmt` at the workspace level. Don't bother about running `cargo test` unless specifically working on tests.
-- Don't put load-bearing code in `lib.rs`, use modules of appropriate names. `lib.rs` should primarily contain module declarations and re-exports.
-- Prefer code that reads top-to-bottom. Eg. my `main.rs` should have `fn main` as the first function, not the last. Follow similar patterns elsewhere.
-- Ensure errors are verbose. Usually prefer `fs_err` to `std::fs`. Always `anyhow::Context` to enrich error messages (when anyhow is appropriate).
-- That which is not necessary is not allowed,.
-- Always simplify. The best change is often to delete. If you don't delete enough to where you occasionally need to undo, you aren't deleting enough.
-- Make things default work. When I run `cargo run` locally, it should run with correct debug flags to test locally. When deployed in cluster, it should work in cluster.
-- Usually print errors as `format!("{err:#}");`
-- Mike Acton, Data Driven Development is good philosophy to adhere to.
-- If you are spawning a thread in Python, you should probably consider writing in Rust.
+This document guides coding agents working on my behalf. Remember these are *principles*, not rules. They do not need to be taken as absolute — use your best judgement. When in doubt, follow them.
+
+## Philosophy
+
+- Tidiness is next to godliness.
+- Simplicity and practicality are the ultimate sophistication. Build the dumb thing that works.
+- That which is not necessary is not allowed. The most common engineering mistake is optimizing a thing that should not exist.
+- Always simplify. The best change is often to delete. If you don't delete enough to where you occasionally need to undo, you aren't deleting enough. You can always re-add things; you cannot recover time lost to unnecessary complexity.
+- Things should get *simpler* over time as understanding grows, not larger. 
+- Doing anything excellently comes down to attention to detail: spend as much time refining as you do building outward.
+- Minimize iteration time — *long-term* iteration time. It is not worth solving a problem today if the solution creates two problems tomorrow. Technical debt has compounding interest.
+- Engineering must be durable. It is as much about building a flywheel of productivity as it is about solving today's problem.
+- People need the whole context in their head to solve problems efficiently. Keep the stack small enough that this is practical — if a system cannot be maintained by a single person, it is too complicated.
+- Never break userspace.
+- Code is a means to an end. It is fungible. What matters is outputs.
+- Action produces information. If unsure what to do, doing something — even the wrong thing — tells you what you should actually be doing.
+- Measure, don't guess. Always start by measuring. Every performance win is found by measurement; intuition about where the time goes is reliably wrong.
+- Avoid solving problems once; try solve them forever. Build processes and automation that eliminate whole categories of problems. If you find yourself troubleshooting the same issue twice, automate the troubleshooting.
+- Use the right tool for the job, not just what is popular or familiar.
+- All tools suck, but some tools are useful. Pick one tool and master its eccentricities rather than juggling many without learning any.
+- Try to use well-established patterns for solving problems, then revisit them only with new information. Deciding your patterns up front pays compounding interest in productivity, and most problems you'll encounter have already been solved.
+- Deal in transferable skills. Embrace well-known patterns and battle-tested libraries; invent only what is absolutely necessary for the critical path.
+- Model systems after the physical world and the processes actually taking place, not abstract hierarchies of concepts. Data-oriented design (Mike Acton) is good philosophy to adhere to.
+- Napoleon, describing a pontoon bridge made of cork: "It could never be sunk by the impact of foreign bodies, or bad weather, or cannon fire. It would have the proper characteristics of a mechanism of war: durability, strength, and simplicity." Build with this mindset — robust and uncomplicated.
+
+
+
+## How to Work With Me
+
+- If something I'm suggesting seems silly, or there is an obviously better way to solve a problem, point it out. Think critically about what I tell you and push back so we can collaborate effectively.
+- If there is a proven pattern to solve a problem that I have not identified, point it out. Be vigilant for anti-patterns and reinventing the wheel.
+- You do not have permission to commit or push to git unless explicitly instructed in the current turn. A one-time instruction is not a blanket request for future turns.
+- We squash-merge every PR, so intermediate commit messages don't matter much.
+- Be concise and get straight to the point. No preamble, no repetition. I can always ask follow-ups.
+- When optimizing anything, work in this order: question the requirements, delete, simplify, optimize, automate. Never optimize before deleting and simplifying.
+- One structural change per pass, measured before and after. Never trust a single noisy run.
+- Instrument first, guess never.
+- If your iteration loop grows beyond O(seconds), stop and improve the test or benchmark harness before continuing.
+- Feel free to aggressively refactor to make things more convenient or better organized. Don't be afraid of trying something new rather than only repeating what has worked in the past.
+- Mise en place: understand the code and prepare your working context before you start cutting.
+
+
+
+## Code Style (All Languages)
+
+- The purpose of code is to be read. The first priority is maintainability — nothing is written correctly on the first try, so maximize optionality by making code easy to read and update.
+- Code should read top-to-bottom. Entry points first, hot path first. Imagine a book where every paragraph made you flip to a different chapter.
+- Disregard conventional ideas of "clean code". Do not write small functions only for the sake of doing so. Prefer readability: minimize jumping around and the context a reader must hold.
+- Abstract late. The more you abstract, the more the code resembles the writer's imagination and less the reality of the problem. Write code that resembles the processes actually taking place.
+- Prefer modules and plain functions over classes — most classes are verbs in disguise as nouns. Keep structs simple and flat; keep newtypes transparent.
+- Make things *default work*. Running the standard build, run, and test commands should just work — on a laptop, a devbox, or in production. Software should figure out where it is running and behave predictably. If it needs a runbook, it's probably broken.
+- Errors must be loud, verbose, and context-rich. Enrich errors as they propagate so the final message tells the whole story.
+- No silent fallbacks. If configuration, environment, or a dependency is wrong, fail loudly at startup rather than degrade quietly.
+- Parse data into types. Use the type system, enums, and newtypes to make buggy code paths structurally unrepresentable.
+- Comments should be *concise*. Better yet, prefer self-documenting code. Comments explain intent and constraints, not what the code does.
+- And, I cannot stress this enough: **comments should be concise**.
+- Delete dead code immediately. No commented-out blocks, no `_old` variants — git remembers.
+- Keep code and logs grep-able. Use consistent, unique names for channels, states, and events so anything can be found by search. Optimize output for bash pipes (sed, awk, grep, ripgrep, cut, etc). 
+- Chaos should heal systems, not break them. Killing or restarting components should drive a system toward health.
+- Keep documentation, comments, and docstrings up to date when changing APIs.
+- Always leave the code in a better state than you found it.
+- Follow the patterns that already exist in a repo. Keep library versions aligned with the rest of the repo, or use latest if no precedent exists.
+- Enable all lints, formatting, and type checking with largely default settings, and treat warnings as errors. Pre-commit checks must exactly match CI or they are useless.
+- Test at the lowest tier that can falsify the change: golden data tests, then unit, then integration, then full system. Acceptance sweeps are for acceptance, never for the iteration loop.
+
+## Rust
+
+- Every binary, except one-file one-offs, has both a `main.rs` and a `lib.rs`. `main.rs` must *never* contain a `mod`; `fn main` should be its first function. `lib.rs` and `mod.rs` should usually contain *only* `mod` and `use` statements — module declarations and re-exports, no load-bearing code.
+- Put all `use` imports at the top of the module, never inline inside functions.
+- Prioritize the hot path. Use `?` and let-else short-circuiting to keep it reading linearly top-to-bottom.
+- Before finishing a task: run `cargo check`, then `cargo clippy --all-features --all-targets`, then `cargo fmt`, then `cargo sort`, and resolve all issues including warnings. Don't run `cargo test` unless specifically working on tests.
+- `Cargo.toml` dependencies should be flat and alphabetized, not interspersed with comments. Never use `workspace = true` dependencies; keep versions consistent across the workspace inline, or select the latest version if no precedent exists.
+- Crates must compile on both macOS and Linux. Feature-gate Linux-only functionality behind stubs.
+- Prefer `fs_err` to `std::fs`. Use `anyhow::Context` to enrich error messages wherever anyhow is appropriate. Print errors as `format!("{err:#}")`.
+- Prefer `#[expect(...)]` over `#[allow(...)]`.
+- Always name your threads.
+- Always set up `tracing-subscriber`. Instrument with `debug!` logs.
+- Always include `// SAFETY` comments when writing unsafe code. When modifying unsafe code, double-check the stated invariants.
+- `parking_lot` and `ahash` give significant performance boosts over std in appropriate situations.
+- For highly asynchronous workloads, lean on RAII patterns and channels. Message passing usually gets you lock-free code, no race conditions, and backpressure. Prefer bounded channels — backpressure by construction.
+- Don't fear globals. The `env-flag` crate or a `Lazy` singleton often dramatically simplifies application code by not threading state everywhere. If only one instance of something should ever exist, make it global and static.
+- Never use compile-time checked queries with sqlx. Always use `query_as`.
+- Follow XDG standards for file locations.
+
+## Python
+
+- Don't forget the `.pyi`.
+- If you are spawning a thread in Python, you should probably be using Rust.
+
+## Systems & Data
+
+- In distributed systems, put timeouts on *everything*. Bounded waits everywhere; every wait names what it waits on; every state machine names its state.
+- Always store data in a portable format. Optimize in-memory representations at runtime however you like, but on disk use portable formats.
+- Evolve APIs and wire formats additively: only add fields, and make them defaultable. This is the mechanism behind never breaking userspace.
+- Make operations idempotent and safe to re-run. Crash-and-restart is a valid recovery strategy. Fail forward as often as possible.
+- Maintain a single source of truth you can trust. Separate the detection of events from the reaction to them.
+
+## CLI & UX
+
+- Make CLI tools astral-esque: snappy, polished, informative UIs.
+- Always show your users progress. Be very clear about what is being waited on and how much is left.
+- Tools must default work in every environment they run in.
+
