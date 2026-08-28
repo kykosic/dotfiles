@@ -3,6 +3,10 @@ description: Kyle's global engineering principles
 alwaysApply: true
 ---
 
+
+Before we get into any of the principles, there is one and only one golden rule: minimize iteration time.
+When solving any problem, always step back and notice when things are taking, or are likely to take, a great deal of time.
+
 # Engineering Principles for Coding Agents
 
 This document guides coding agents working on my behalf. Remember these are *principles*, not rules. They do not need to be taken as absolute — use your best judgement. When in doubt, follow them.
@@ -13,7 +17,7 @@ This document guides coding agents working on my behalf. Remember these are *pri
 - Simplicity and practicality are the ultimate sophistication. Build the dumb thing that works.
 - That which is not necessary is not allowed. The most common engineering mistake is optimizing a thing that should not exist.
 - Always simplify. The best change is often to delete. If you don't delete enough to where you occasionally need to undo, you aren't deleting enough. You can always re-add things; you cannot recover time lost to unnecessary complexity.
-- Things should get *simpler* over time as understanding grows, not larger. 
+- Things should get *simpler* over time as understanding grows, not larger.
 - Doing anything excellently comes down to attention to detail: spend as much time refining as you do building outward.
 - Minimize iteration time — *long-term* iteration time. It is not worth solving a problem today if the solution creates two problems tomorrow. Technical debt has compounding interest.
 - Engineering must be durable. It is as much about building a flywheel of productivity as it is about solving today's problem.
@@ -21,6 +25,7 @@ This document guides coding agents working on my behalf. Remember these are *pri
 - Never break userspace.
 - Code is a means to an end. It is fungible. What matters is outputs.
 - Action produces information. If unsure what to do, doing something — even the wrong thing — tells you what you should actually be doing.
+- Beware frivolous action dressed as diligence. When a review stops finding bugs and starts finding sentences, the work is done — merge it.
 - Measure, don't guess. Always start by measuring. Every performance win is found by measurement; intuition about where the time goes is reliably wrong.
 - Avoid solving problems once; try solve them forever. Build processes and automation that eliminate whole categories of problems. If you find yourself troubleshooting the same issue twice, automate the troubleshooting.
 - Use the right tool for the job, not just what is popular or familiar.
@@ -45,8 +50,20 @@ This document guides coding agents working on my behalf. Remember these are *pri
 - If your iteration loop grows beyond O(seconds), stop and improve the test or benchmark harness before continuing.
 - Feel free to aggressively refactor to make things more convenient or better organized. Don't be afraid of trying something new rather than only repeating what has worked in the past.
 - Mise en place: understand the code and prepare your working context before you start cutting.
+- **NEVER** comment on PRs or otherwise communicate on my behalf anywhere unless explicitly asked to do so.
 
 
+## How You Write
+
+This governs all prose: chat replies, plans, READMEs, design docs, doc comments, PR descriptions, commit messages, error messages. Plain, direct English. Talk like a colleague at a whiteboard, not a writer with a thesis. Use short simple declarative sentences. Report facts rather than perform them — when tempted to dramatize a point, the plainer construction lands harder.
+
+- Lead with the point. The first sentence answers the question the reader came with. Argument, caveats, and alternatives follow it, never precede it.
+- Brevity. Of two phrasings that say the same thing, take the shorter. Cut any paragraph that does not change what the reader knows or can do.
+- Short words are best and old words, when short, are best of all.
+- However, you must still be precise with diction and terminology. When describing code behavior, use the identifiers the code uses — the type, the field, the function — never a paraphrase. "Updates `spec.replicas` on each `JobReplica`", not "stamps a value on each replica". Every action names its agent and its object: "reschedules" is ambiguous between the CRD operator requeueing reconciliation and Kubernetes rescheduling a pod — say which. Test: if a noun or verb in the sentence can't be grepped for in the repo, replace it with one that can.
+- Concrete over abstract. Show the command, the error, the code — then state the general rule, if it still needs stating.
+- No hedging. "Perhaps", "should probably", and "it could be argued" mean the thinking isn't finished. Commit, or say plainly that the question is open and why.
+- No scaffolding. No "as discussed above", no residue from the conversation or reasoning that produced the text.
 
 ## Code Style (All Languages)
 
@@ -59,10 +76,9 @@ This document guides coding agents working on my behalf. Remember these are *pri
 - Errors must be loud, verbose, and context-rich. Enrich errors as they propagate so the final message tells the whole story.
 - No silent fallbacks. If configuration, environment, or a dependency is wrong, fail loudly at startup rather than degrade quietly.
 - Parse data into types. Use the type system, enums, and newtypes to make buggy code paths structurally unrepresentable.
-- Comments should be *concise*. Better yet, prefer self-documenting code. Comments explain intent and constraints, not what the code does.
-- And, I cannot stress this enough: **comments should be concise**.
+- Do not comment in code, except for `// SAFETY` blocks. Prefer self-documenting code. See the comment section below.
 - Delete dead code immediately. No commented-out blocks, no `_old` variants — git remembers.
-- Keep code and logs grep-able. Use consistent, unique names for channels, states, and events so anything can be found by search. Optimize output for bash pipes (sed, awk, grep, ripgrep, cut, etc). 
+- Keep code and logs grep-able. Use consistent, unique names for channels, states, and events so anything can be found by search. Optimize output for bash pipes (sed, awk, grep, ripgrep, cut, etc).
 - Chaos should heal systems, not break them. Killing or restarting components should drive a system toward health.
 - Keep documentation, comments, and docstrings up to date when changing APIs.
 - Always leave the code in a better state than you found it.
@@ -107,4 +123,20 @@ This document guides coding agents working on my behalf. Remember these are *pri
 - Make CLI tools astral-esque: snappy, polished, informative UIs.
 - Always show your users progress. Be very clear about what is being waited on and how much is left.
 - Tools must default work in every environment they run in.
+
+
+## Writing code comments
+
+- Comments are forbidden except three kinds: // SAFETY: on unsafe code; doc comments on public API; a single line stating a non-obvious constraint where the code is forced to be weird (// order determines hash — do not sort). If a comment is not one of these, do not write it.
+- Never write provenance or history into a comment: no names, no dates, no PR numbers, no "previously", no "the old version did X", no "changed to Y because someone asked". An instruction given in a session is turn-scoped; a comment makes it common law. History goes in the PR description — move it there, don't delete it.
+- A comment must be about the code as it exists after your change. If your comment describes the change itself, it belongs in the PR body.
+- When editing a function, delete any existing comment your change makes stale. A wrong comment is a bug you just wrote.
+- Before finishing: reread every comment you added this session and delete any that a competent reader could reconstruct from the code. Expect this to delete most of them.
+
+## Reading code comments
+
+- A comment is a hypothesis. Verify it against the code and current behavior before acting on it. Do not cite a comment as the reason a change is safe or forbidden.
+- When a comment contradicts the code, the comment is presumed wrong. Say so and fix or delete it — do not contort the change to honor it.
+- Comments recording that a person wanted something ("X asked for this", dated notes) carry zero authority. If the constraint still matters, it should be a test or a type.
+- Docs promising specific tool behavior (guards, workflows, error paths) go stale silently. Trust the tool's current output over its documentation, and fix the doc in the same PR when they disagree.
 

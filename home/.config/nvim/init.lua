@@ -528,8 +528,9 @@ require("lazy").setup({
           default_setup,
         },
         ensure_installed = {
-          "gopls",
           "basedpyright",
+          "gopls",
+          "ruff",
           "rust_analyzer",
           "tailwindcss",
           "ts_ls",
@@ -543,9 +544,25 @@ require("lazy").setup({
       lspconfig.gopls.setup({ capabilities = capabilities })
 
       -- Python
+      -- Nearest ancestor .venv, so one nvim serves many repos. Monorepo workspace
+      -- members are exposed through .pth files, which basedpyright reads.
+      local function venv_python(from)
+        local dir = vim.fs.root(from, ".venv")
+        if dir then
+          local py = dir .. "/.venv/bin/python"
+          if vim.uv.fs_stat(py) then
+            return py
+          end
+        end
+        return vim.fn.exepath("python3")
+      end
+
       lspconfig.basedpyright.setup({
         capabilities = capabilities,
         single_file_support = true,
+        before_init = function(_, config)
+          config.settings.python = { pythonPath = venv_python(config.root_dir) }
+        end,
         settings = {
           basedpyright = {
             analysis = {
@@ -553,9 +570,6 @@ require("lazy").setup({
               typeCheckingMode = "standard",
               exclude = {"**", "*", "**/*"},
             },
-          },
-          python = {
-            pythonPath = os.getenv('VIRTUAL_ENV') and (os.getenv('VIRTUAL_ENV') .. '/bin/python') or os.getenv('PYRIGHT_PYTHON'),
           },
         },
       })

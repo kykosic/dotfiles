@@ -82,9 +82,13 @@ export KUBE_EDITOR=nvim
 # Terraform
 alias tf=terraform
 
+# Bazel
+alias b=bazel
+
 # Python
 export PYTHONUNBUFFERED=1
 export PATH="$HOME/.local/bin:$PATH"
+export PATH="$HOME/.local/share/venvs/global/bin:$PATH"
 
 # Rust
 export PATH="$HOME/.cargo/bin:$PATH"

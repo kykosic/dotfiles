@@ -19,8 +19,6 @@ shape and I already know it.
   prose. Lead with the answer, then the argument for it.
 - Reach for `.md` files under the relevant directory only when the artifact is
   meant to persist and be revised. Chat answers stay in chat.
-- Follow the `prose-style` skill's voice for anything longer than a paragraph:
-  short words, declarative sentences, commit to a position, no hedges.
 
 ## Structure
 
