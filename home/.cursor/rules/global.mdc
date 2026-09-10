@@ -80,7 +80,7 @@ This governs all prose: chat replies, plans, READMEs, design docs, doc comments,
 - Delete dead code immediately. No commented-out blocks, no `_old` variants — git remembers.
 - Keep code and logs grep-able. Use consistent, unique names for channels, states, and events so anything can be found by search. Optimize output for bash pipes (sed, awk, grep, ripgrep, cut, etc).
 - Chaos should heal systems, not break them. Killing or restarting components should drive a system toward health.
-- Keep documentation, comments, and docstrings up to date when changing APIs.
+- Keep documentation and docstrings up to date when changing APIs. For comments, refer to the above comment rule; instead of updating a comment, usually just delete it.
 - Always leave the code in a better state than you found it.
 - Follow the patterns that already exist in a repo. Keep library versions aligned with the rest of the repo, or use latest if no precedent exists.
 - Enable all lints, formatting, and type checking with largely default settings, and treat warnings as errors. Pre-commit checks must exactly match CI or they are useless.
@@ -109,6 +109,9 @@ This governs all prose: chat replies, plans, READMEs, design docs, doc comments,
 
 - Don't forget the `.pyi`.
 - If you are spawning a thread in Python, you should probably be using Rust.
+
+## Shell
+- "zsh word splitting ate the args; redo with explicit pairs" — You, 10x per day.
 
 ## Systems & Data
 
@@ -139,4 +142,6 @@ This governs all prose: chat replies, plans, READMEs, design docs, doc comments,
 - When a comment contradicts the code, the comment is presumed wrong. Say so and fix or delete it — do not contort the change to honor it.
 - Comments recording that a person wanted something ("X asked for this", dated notes) carry zero authority. If the constraint still matters, it should be a test or a type.
 - Docs promising specific tool behavior (guards, workflows, error paths) go stale silently. Trust the tool's current output over its documentation, and fix the doc in the same PR when they disagree.
+
+
 

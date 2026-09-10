@@ -41,7 +41,7 @@ alias sv=supervisorctl
 
 # git
 alias gs="git status"
-alias git-sub="git submodule update --init --recursive"
+alias gsub="git submodule update --init --recursive"
 alias grg="git ls-files | rg"
 alias pc="pre-commit run --from-ref origin/main --to-ref HEAD"
 
